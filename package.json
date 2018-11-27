@@ -7,15 +7,25 @@
   "author": "Kyle <kingerkyleking@gmail.com>",
   "license": "GPL-3.0",
   "private": true,
+  "bin": {
+    "tb": "./build/index.js",
+    "thunder-bird": "./build/index.js"
+  },
   "scripts": {
-    "build": "babel src --out-dir build"
+    "linking": "sudo chmod +x build/index.js && sudo npm link",
+    "build": "babel src -d build && npm run linking",
+    "build:watch": "nodemon --exec yarn build --watch src/",
+    "start": "node ./build/index.js"
   },
   "devDependencies": {
     "@babel/cli": "^7.1.5",
     "@babel/core": "^7.1.6",
-    "@babel/preset-env": "^7.1.6"
+    "@babel/preset-env": "^7.1.6",
+    "nodemon": "^1.18.6"
   },
   "dependencies": {
-    "commander": "^2.19.0"
+    "chalk": "^2.4.1",
+    "commander": "^2.19.0",
+    "lodash": "^4.17.11"
   }
 }
