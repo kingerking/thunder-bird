@@ -1,0 +1,21 @@
+{
+  "name": "@kinger6621/thunder-bird",
+  "version": "0.0.1",
+  "description": "A robust script execution command line program",
+  "main": "build/index.js",
+  "repository": "https://github.com/kingerking/thunder-bird",
+  "author": "Kyle <kingerkyleking@gmail.com>",
+  "license": "GPL-3.0",
+  "private": true,
+  "scripts": {
+    "build": "babel src --out-dir build"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.1.5",
+    "@babel/core": "^7.1.6",
+    "@babel/preset-env": "^7.1.6"
+  },
+  "dependencies": {
+    "commander": "^2.19.0"
+  }
+}
