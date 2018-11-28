@@ -3,7 +3,7 @@ import path from 'path';
 import { omit } from 'lodash';
 import { loadStore, saveStore } from './helpers.js';
 import chalk from 'chalk';
-import child_process from 'child_process';
+import { exec } from 'child_process';
 
 /**
  * Basic command
@@ -36,16 +36,29 @@ export const removeCommand = program =>
             console.log(chalk.green(`Successfully removed the store with the name ${name}`));
         });
 
+const writeLine = (data) => {
+    const lines = data.toString('utf-8').split('\n');
+    lines.forEach(line => process.stdout.write("\n" + line));
+};
+
 export const executionCommand = program =>
     program.command('run <linkName> [params...]')
         .action((linkName, params = [], cmd) => {
             const store = loadStore();
             const link = store.resolve[linkName];
             if (!link) return console.log(chalk.red(`Failed to find ${linkName} as a valid link.`));
-            child_process.exec(`node ${link} ${params.join(" ")}`, (err, stdout, stderr) => {
-                console.log("==================");
-                if (err) return console.log(chalk.red(err));
-                if (stderr) return console.log(chalk.red(stderr));
-                if (stdout) console.log(stdout);
+            console.log("========Starting Process==========");
+            const builtCommand = `node ${link} ${params.join(" ")}`;
+            console.log("running command: ", builtCommand);
+            const child = exec(link, params
+                // process.stdout.write('\n' + err.toString('utf-8') || stderr.toString('utf-8') || stdout.toString('utf-8'))
+            );
+
+            child.stdout.on('data', writeLine);
+            child.stderr.on('data', writeLine);
+            child.on('close', (data) => {
+                console.log(chalk.green("Clean exit."));
+                process.exit(0);
             });
         });
+
