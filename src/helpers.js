@@ -13,8 +13,10 @@ export function loadStore() {
     return storageObject;
 }
 
-export function saveStore(store = {}) {
-    const currentStore = loadStore();
-    const newStore = merge(currentStore, store);
+export function saveStore(store = {}, absolute = false) {
+    if (!absolute) {
+        var currentStore = loadStore();
+        var newStore = merge(currentStore, store);
+    } else if(absolute) var newStore = store;
     fs.writeFileSync(storageFileURL, JSON.stringify(newStore, null, 4));
 }
