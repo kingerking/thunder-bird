@@ -25,6 +25,31 @@ export const creationCommand = program =>
             console.log(chalk.green(`Success! now run ${p} with tb run ${name}`));
         });
     
+export const updatePathCommand = program =>
+    program.command("update-path <name> <newPath>")
+        .action((name, newPath, cmd) => {
+            const parsedPath = path.resolve(newPath);
+            const store = loadStore();
+            const entity = store.resolve[name];
+            if (!entity) return console.log(chalk.red(`Failed to resolve entity with name of ${name}`));
+            const newResolutions = omit(store.resolve, name);
+            newResolutions[name] = parsedPath;
+            store.resolve = newResolutions;
+            saveStore(store, true);
+            console.log(chalk.green("Updated path."));
+        });
+
+export const updateNameCommand = program => 
+    program.command("update-name <name> <newName>")
+    .action((currentName, newName, cmd) => {
+        const store = loadStore();
+        const entity = store.resolve[currentName];
+        if (!entity) return console.log(chalk.red(`Failed to resolve entity with name of ${currentName}`));
+        const newResolutions = omit(store.resolve, currentName);
+        newResolutions[newName] = entity;
+        saveStore(store, true);
+    })
+
 export const removeCommand = program =>
     program.command('remove <name>')
         .action((name, cmd) => {
