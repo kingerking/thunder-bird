@@ -61,24 +61,20 @@ export const removeCommand = program =>
             console.log(chalk.green(`Successfully removed the store with the name ${name}`));
         });
 
-const writeLine = (data) => {
-    const lines = data.toString('utf-8').split('\n');
-    lines.forEach(line => process.stdout.write("\n" + line));
-};
-
+/**
+ * Will run a linked command(use tb create <name> <relative file url>).
+ * @param {*} program 
+ */
 export const executionCommand = program =>
     program.command('run <linkName> [params...]')
-        .option('-m, --maxBuffer', "The Max amount of data allowed on stdout and stderr buffers, default 1024Squared*2(approx. 2GBish)")
         .action((linkName, params = [], cmd) => {
-            console.log("buffer: ", cmd.maxBuffer);
             const store = loadStore();
             const link = store.resolve[linkName];
             if (!link) return console.log(chalk.red(`Failed to find ${linkName} as a valid link.`));
             const bufferLimit = store.settings.bufferLimit ? Number.parseInt(store.settings.bufferLimit) : 1024 * 1024 * 2;
-            const child = child_process.execFile(link, params, {
-                maxBuffer: Number.parseInt(bufferLimit)
-            });
-            child.stdout.on('data', data => process.stdout.write(data));
-            child.stderr.on('data', data => process.stderr.write(chalk.red(data)));
+            const child = child_process.fork(link, params);
+            child.on('message', data => process.stdout.write(data + "\n"));
+            child.on('error', data => process.stderr.write(chalk.red(data + "\n")));
+            child.on('exit', (code, signal) => process.exit(code));
             
         });
