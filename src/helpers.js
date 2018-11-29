@@ -1,5 +1,5 @@
 
-import { merge } from 'lodash';
+import { merge, values } from 'lodash';
 import { storageFileURL } from './index';
 import fs from 'fs';
 import path from 'path';
@@ -19,4 +19,25 @@ export function saveStore(store = {}, absolute = false) {
         var newStore = merge(currentStore, store);
     } else if(absolute) var newStore = store;
     fs.writeFileSync(storageFileURL, JSON.stringify(newStore, null, 4));
+    this.permissionLinks();
 }
+
+/**
+ * Will make all the linked files executable.
+ */
+export function permissionLinks() {
+    const { resolve } = loadStore();
+    const fileLinks = values(resolve);
+    let output = "";
+    fileLinks.forEach(fileLink => {
+        if (!exists(fileLink)) 
+            return;
+        child_process.exec(`chmod +x ${fileLink}`, (err, stdout, stderr) => output += (err || stdout || stderr));
+    });
+}
+
+/**
+ * Weather or not this file is valid.
+ * @param {*} url 
+ */
+export const exists = url => fs.existsSync(url);

@@ -1,9 +1,9 @@
 
 import path from 'path';
-import { omit } from 'lodash';
-import { loadStore, saveStore } from './helpers.js';
+import { omit, values } from 'lodash';
+import { loadStore, saveStore, exists } from './helpers.js';
 import chalk from 'chalk';
-import { exec } from 'child_process';
+import child_process from 'child_process';
 
 /**
  * Basic command
@@ -68,22 +68,17 @@ const writeLine = (data) => {
 
 export const executionCommand = program =>
     program.command('run <linkName> [params...]')
+        .option('-m, --maxBuffer', "The Max amount of data allowed on stdout and stderr buffers, default 1024Squared*2(approx. 2GBish)")
         .action((linkName, params = [], cmd) => {
+            console.log("buffer: ", cmd.maxBuffer);
             const store = loadStore();
             const link = store.resolve[linkName];
             if (!link) return console.log(chalk.red(`Failed to find ${linkName} as a valid link.`));
-            console.log("========Starting Process==========");
-            const builtCommand = `node ${link} ${params.join(" ")}`;
-            console.log("running command: ", builtCommand);
-            const child = exec(link, params
-                // process.stdout.write('\n' + err.toString('utf-8') || stderr.toString('utf-8') || stdout.toString('utf-8'))
-            );
-
-            child.stdout.on('data', writeLine);
-            child.stderr.on('data', writeLine);
-            child.on('close', (data) => {
-                console.log(chalk.green("Clean exit."));
-                process.exit(0);
+            const bufferLimit = store.settings.bufferLimit ? Number.parseInt(store.settings.bufferLimit) : 1024 * 1024 * 2;
+            const child = child_process.execFile(link, params, {
+                maxBuffer: Number.parseInt(bufferLimit)
             });
+            child.stdout.on('data', data => process.stdout.write(data));
+            child.stderr.on('data', data => process.stderr.write(chalk.red(data)));
+            
         });
-
