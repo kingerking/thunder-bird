@@ -17,7 +17,7 @@ export const creationCommand = program =>
             const store = loadStore();
             if (store.resolve[name] && !cmd.overwrite) // name exists.
                 return console.log(
-                    chalk.red(`That link already exists. If you wish to remove the link please run ${chalk.yellow(`tb remove-link ${name}`)}`) + "\n" +
+                    chalk.red(`That link already exists. If you wish to remove the link please run ${chalk.yellow(`tb remove ${name}`)}`) + "\n" +
                     chalk.red(`If you wish to overwrite this then run this: ${chalk.yellow(`tb create-link -o ${name} ${p}`)} or run ${chalk.yellow(`tb update-link ${name} ${p}`)}`)
                 );
             store.resolve[name] = parsedPath;
