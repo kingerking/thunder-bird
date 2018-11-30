@@ -1,9 +1,8 @@
 
 import path from 'path';
-import { omit, values } from 'lodash';
-import { loadStore, saveStore, exists, LOG_HELPER } from './helpers.js';
+import { omit } from 'lodash';
+import { loadStore, saveStore, LOG_HELPER, executeCommand } from './helpers.js';
 import chalk from 'chalk';
-import child_process from 'child_process';
 
 /**
  * Basic command
@@ -16,9 +15,10 @@ export const creationCommand = program =>
             const parsedPath = path.resolve(p);
             const store = loadStore();
             if (store.resolve[name] && !cmd.overwrite) // name exists.
-                return console.log(LOG_HELPER.INFO(
-                    `That link already exists. If you wish to remove the link please run ${chalk.yellow(`tb remove ${name}`)}`,
-                    `If you wish to overwrite this then run: ${LOG_HELPER.INLINE_CMD(`tb create-link -o ${name} ${p}`)}`,
+                return console.log(LOG_HELPER.ERR(
+                    `That link already exists.`,
+                    `If you wish to remove the link please run ${LOG_HELPER.INLINE_CMD(`tb remove ${name}`)}`,
+                    `If you wish to overwrite this then run: ${LOG_HELPER.INLINE_CMD(`tb create -o ${name} ${p}`)}`,
                     `or run ${LOG_HELPER.INLINE_CMD(`tb update-link ${name} ${p}`)}`
                 ));
             store.resolve[name] = parsedPath;
@@ -32,12 +32,16 @@ export const updatePathCommand = program =>
             const parsedPath = path.resolve(newPath);
             const store = loadStore();
             const entity = store.resolve[name];
-            if (!entity) return console.log(chalk.red(`Failed to resolve entity with name of ${name}`));
+            if (!entity) return console.log(LOG_HELPER.ERR(
+                `Failed to resolve entity with name of ${LOG_HELPER.INLINE_STAND_OUT(name)}`
+            ));
             const newResolutions = omit(store.resolve, name);
             newResolutions[name] = parsedPath;
             store.resolve = newResolutions;
             saveStore(store, true);
-            console.log(chalk.green("Updated path."));
+            console.log(LOG_HELPER.INFO(
+                `Successfully updated ${LOG_HELPER.INLINE_STAND_OUT(name + "'s")} path to ${LOG_HELPER.INLINE_STAND_OUT(parsedPath)}`
+            ));
         });
 
 export const updateNameCommand = program => 
@@ -45,7 +49,9 @@ export const updateNameCommand = program =>
     .action((currentName, newName, cmd) => {
         const store = loadStore();
         const entity = store.resolve[currentName];
-        if (!entity) return console.log(chalk.red(`Failed to resolve entity with name of ${currentName}`));
+        if (!entity) return console.log(LOG_HELPER.ERR(
+            `Failed to resolve entity with name of ${LOG_HELPER.INLINE_STAND_OUT(currentName)}`
+        ));
         const newResolutions = omit(store.resolve, currentName);
         newResolutions[newName] = entity;
         saveStore(store, true);
@@ -56,10 +62,14 @@ export const removeCommand = program =>
         .action((name, cmd) => {
             const store = loadStore();
             const path = store.resolve[name];
-            if (!path) return console.log(chalk.red(`Failed to find path with name: ${name}`));
+            if (!path) return console.log(LOG_HELPER.ERR(
+                `Failed to find path with name: ${LOG_HELPER.INLINE_STAND_OUT(name)}`
+            ));
             store.resolve = omit(store.resolve, [name]);
             saveStore(store, true);
-            console.log(chalk.green(`Successfully removed the store with the name ${name}`));
+            console.log(LOG_HELPER.INFO(
+                `Successfully removed the command with the name ${LOG_HELPER.INLINE_STAND_OUT(name)}`
+            ));
         });
 
 /**
@@ -69,13 +79,5 @@ export const removeCommand = program =>
 export const executionCommand = program =>
     program.command('run <linkName> [params...]')
         .action((linkName, params = [], cmd) => {
-            const store = loadStore();
-            const link = store.resolve[linkName];
-            if (!link) return console.log(chalk.red(`Failed to find ${linkName} as a valid link.`));
-            const bufferLimit = store.settings.bufferLimit ? Number.parseInt(store.settings.bufferLimit) : 1024 * 1024 * 2;
-            const child = child_process.fork(link, params);
-            child.on('message', data => process.stdout.write(data + "\n"));
-            child.on('error', data => process.stderr.write(chalk.red(data + "\n")));
-            child.on('exit', (code, signal) => process.exit(code));
-            
+            executeCommand(linkName, params, cmd);
         });

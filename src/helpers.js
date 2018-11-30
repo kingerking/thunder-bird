@@ -9,9 +9,9 @@ import chalk from 'chalk';
 /**
  * Will add a + so users know something is assoiated with a given log
  */
-function replaceNewLineWithPlus(lineBuffer) {
+function replaceNewLineWithPlus(lineBuffer, plusArrowColorFunc = chalk.yellow) {
     const lines = lineBuffer.split('\n').map(element => element.replace('\n', ''));
-    return lines.join(`\n  ${chalk.bold(chalk.yellow("+"))}  `);
+    return lines.join(`\n  ${chalk.bold(chalk.yellow(plusArrowColorFunc("+")))}  `);
 }
 
 /**
@@ -19,9 +19,10 @@ function replaceNewLineWithPlus(lineBuffer) {
  */
 export const LOG_HELPER = {
     INFO: (...str) => `${chalk.bold(chalk.yellow('Info'))} ${chalk.gray(replaceNewLineWithPlus(str.join('\n')))}`,
-    ERR: (...str) => `${chalk.bold(chalk.red('Error'))} ${replaceNewLineWithPlus(str.join('\n'))}`,
+    ERR: (...str) => `${chalk.bold(chalk.red('Error'))} ${chalk.gray(replaceNewLineWithPlus(str.join('\n'), chalk.red))}`,
     CMD: (...str) => `${chalk.bold(chalk.magenta('CMD'))} ${chalk.cyan(replaceNewLineWithPlus(str.join('\n')))}`,
-    INLINE_CMD: (...str) => `${chalk.cyan(replaceNewLineWithPlus(str.join('\n')))}`
+    INLINE_CMD: (...str) => `${chalk.cyan(replaceNewLineWithPlus(str.join('\n')))}`,
+    INLINE_STAND_OUT: (...str) => `${chalk.bold(chalk.magenta(replaceNewLineWithPlus(str.join('\n'))))}`
 }
 
 
@@ -64,6 +65,23 @@ export function saveStore(store = {}, absolute = false) {
     permissionLinks();
 }
 
+/**
+ * Will run a command.
+ * @param {*} linkName 
+ * @param {*} params 
+ * @param {*} cmd 
+ */
+export function executeCommand(linkName, params, cmd) {
+    const store = loadStore();
+    const link = store.resolve[linkName];
+    if (!link) return console.log(LOG_HELPER.ERR(
+        `Failed to find ${LOG_HELPER.INLINE_STAND_OUT(linkName)} as a valid link.`
+    ));
+    const child = child_process.fork(link, params);
+    child.on('message', data => process.stdout.write(data + "\n"));
+    child.on('error', data => process.stderr.write(chalk.red(data + "\n")));
+    child.on('exit', (code, signal) => process.exit(code));
+}
 
 /**
  * Weather or not this file is valid.

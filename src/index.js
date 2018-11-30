@@ -3,8 +3,9 @@ import commander from 'commander';
 import pkg from '../package.json';
 import fs from 'fs';
 import path from 'path';
+import { loadStore, LOG_HELPER, executeCommand } from './helpers';
 import * as commands from './commands';
-import { forEach, values } from 'lodash';
+import { forEach, values, keys } from 'lodash';
 
 const DEFAULT_CONFIG = {
     /**
@@ -24,6 +25,25 @@ const createStorageFile = () => {
     fs.writeFileSync(storageFileURL, JSON.stringify(DEFAULT_CONFIG))
 }
 
+/**
+ * Will return command objects for all the registered .resolve[]'s in the storage file.
+ * (much like yarn npm "scripts" commands)
+ */
+const buildUserCommandsIntoFunctions = program => {
+    const { resolve: links } = loadStore();
+    if (!links) return console.log(LOG_HELPER.ERR(
+        `Failed to load store.`
+    ));
+    forEach(keys(links), key => {
+        const entity = links[key];
+        if (!entity) return console.log(LOG_HELPER.ERR(
+            `Failed to find entity with name: ${LOG_HELPER.INLINE_STAND_OUT(key)}`
+        ));
+        program.command(`${key} [params...]`).
+            action((params = [], cmd) => executeCommand(key, params, cmd));
+    })
+}
+
 // this will check for a configuration file, if non exists this will create one.
 const initProgram = () => {
     if (!fs.existsSync(storageFileURL))
@@ -31,11 +51,12 @@ const initProgram = () => {
 }
 
 const program = commander.version(pkg.version);
+initProgram();
 
 // iterate through all command bodies so they can be registered with commander.
-forEach(values(commands), commandFunctionBody => commandFunctionBody(program));
+forEach(values(commands, buildUserCommandsIntoFunctions(program)),
+    commandFunctionBody => commandFunctionBody(program));
 
 
 
-initProgram();
 program.parse(process.argv);
