@@ -1,4 +1,4 @@
-#thunder-bird
+# thunder-bird
 ### What it does
 Thunder bird makes writing algorthims and node script utilities easy as cake!
 You simply make a thunder bird command and link it to a file then execute that file anywhere!
