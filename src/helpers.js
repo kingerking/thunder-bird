@@ -4,6 +4,26 @@ import { storageFileURL } from './index';
 import child_process from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import chalk from 'chalk';
+
+/**
+ * Will add a + so users know something is assoiated with a given log
+ */
+function replaceNewLineWithPlus(lineBuffer) {
+    const lines = lineBuffer.split('\n').map(element => element.replace('\n', ''));
+    return lines.join(`\n  ${chalk.bold(chalk.yellow("+"))}  `);
+}
+
+/**
+ * Helper for logs.
+ */
+export const LOG_HELPER = {
+    INFO: (...str) => `${chalk.bold(chalk.yellow('Info'))} ${chalk.gray(replaceNewLineWithPlus(str.join('\n')))}`,
+    ERR: (...str) => `${chalk.bold(chalk.red('Error'))} ${replaceNewLineWithPlus(str.join('\n'))}`,
+    CMD: (...str) => `${chalk.bold(chalk.magenta('CMD'))} ${chalk.cyan(replaceNewLineWithPlus(str.join('\n')))}`,
+    INLINE_CMD: (...str) => `${chalk.cyan(replaceNewLineWithPlus(str.join('\n')))}`
+}
+
 
 /**
  * Load the storage buffer.

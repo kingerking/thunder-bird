@@ -1,7 +1,7 @@
 
 import path from 'path';
 import { omit, values } from 'lodash';
-import { loadStore, saveStore, exists } from './helpers.js';
+import { loadStore, saveStore, exists, LOG_HELPER } from './helpers.js';
 import chalk from 'chalk';
 import child_process from 'child_process';
 
@@ -16,13 +16,14 @@ export const creationCommand = program =>
             const parsedPath = path.resolve(p);
             const store = loadStore();
             if (store.resolve[name] && !cmd.overwrite) // name exists.
-                return console.log(
-                    chalk.red(`That link already exists. If you wish to remove the link please run ${chalk.yellow(`tb remove ${name}`)}`) + "\n" +
-                    chalk.red(`If you wish to overwrite this then run this: ${chalk.yellow(`tb create-link -o ${name} ${p}`)} or run ${chalk.yellow(`tb update-link ${name} ${p}`)}`)
-                );
+                return console.log(LOG_HELPER.INFO(
+                    `That link already exists. If you wish to remove the link please run ${chalk.yellow(`tb remove ${name}`)}`,
+                    `If you wish to overwrite this then run: ${LOG_HELPER.INLINE_CMD(`tb create-link -o ${name} ${p}`)}`,
+                    `or run ${LOG_HELPER.INLINE_CMD(`tb update-link ${name} ${p}`)}`
+                ));
             store.resolve[name] = parsedPath;
             saveStore(store);
-            console.log(chalk.green(`Success! now run ${p} with tb run ${name}`));
+            console.log(LOG_HELPER.INFO(`Success! now run your file with ${LOG_HELPER.INLINE_CMD(`tb run ${name}`)}`));
         });
     
 export const updatePathCommand = program =>
