@@ -1,6 +1,6 @@
 
 import path from 'path';
-import { omit } from 'lodash';
+import { omit, forEach, values, keys } from 'lodash';
 import { loadStore, saveStore, LOG_HELPER, executeCommand } from './helpers.js';
 import chalk from 'chalk';
 
@@ -23,8 +23,18 @@ export const creationCommand = program =>
                 ));
             store.resolve[name] = parsedPath;
             saveStore(store);
-            console.log(LOG_HELPER.INFO(`Success! now run your file with ${LOG_HELPER.INLINE_CMD(`tb run ${name}`)}`));
+            console.log(LOG_HELPER.INFO(`Success! now run your file with ${LOG_HELPER.INLINE_CMD(`tb ${name}`)}`));
         });
+
+export const listCommand = program =>
+    program.command('list')
+        .action((cmd) => {
+            const { resolve } = loadStore();
+            const resolvedKeys = keys(resolve);
+            forEach(values(resolve), (resolution, index) => {
+                console.log(LOG_HELPER.INFO(`Name: ${LOG_HELPER.INLINE_STAND_OUT(resolvedKeys[index])}, Script: ${LOG_HELPER.INLINE_STAND_OUT(resolution)}`));
+            });        
+    });
     
 export const updatePathCommand = program =>
     program.command("update-path <name> <newPath>")
