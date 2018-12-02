@@ -5,6 +5,14 @@ import child_process from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import chalk from 'chalk';
+import debug from 'debug';
+import { asTree } from 'treeify';
+
+export const log = {
+    common: debug('common'),
+    internal_error: debug('internal_error'),
+    common_large: debug('common_large')
+};
 
 /**
  * Will add a + so users know something is assoiated with a given log
@@ -18,7 +26,8 @@ function replaceNewLineWithPlus(lineBuffer, plusArrowColorFunc = chalk.yellow) {
  * Helper for logs.
  */
 export const LOG_HELPER = {
-    INFO: (...str) => `${chalk.bold(chalk.yellow('Info'))} ${chalk.gray(replaceNewLineWithPlus(str.join('\n')))}`,
+    INFO_CUSTOM: (name, ...str) => `${chalk.bold(chalk.yellow(name))} ${chalk.gray(replaceNewLineWithPlus(str.join('\n')))}`,
+    INFO: (...str) => `${chalk.bold(chalk.yellow("Info"))} ${chalk.gray(replaceNewLineWithPlus(str.join('\n')))}`,
     ERR: (...str) => `${chalk.bold(chalk.red('Error'))} ${chalk.gray(replaceNewLineWithPlus(str.join('\n'), chalk.red))}`,
     CMD: (...str) => `${chalk.bold(chalk.magenta('CMD'))} ${chalk.cyan(replaceNewLineWithPlus(str.join('\n')))}`,
     INLINE_CMD: (...str) => `${chalk.cyan(replaceNewLineWithPlus(str.join('\n')))}`,
@@ -33,6 +42,10 @@ export const LOG_HELPER = {
 export function loadStore() {
     const storageObject = JSON.parse(fs.readFileSync(storageFileURL));
     if (!storageObject) throw new Error("Failed to resolve thunder-bird store file.");
+    log.common_large(LOG_HELPER.INFO_CUSTOM('Store File',
+        `Store Load`, ``,
+        asTree(storageObject, true)
+    ));
     return storageObject;
 }
 
@@ -62,6 +75,7 @@ export function saveStore(store = {}, absolute = false) {
         var newStore = merge(currentStore, store);
     } else if(absolute) var newStore = store;
     fs.writeFileSync(storageFileURL, JSON.stringify(newStore, null, 4));
+    log.common_large(LOG_HELPER.INFO_CUSTOM('Store File', 'Store Load', asTree(newStore, true)));
     permissionLinks();
 }
 

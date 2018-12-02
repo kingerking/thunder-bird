@@ -20,12 +20,13 @@
     "@babel/cli": "^7.1.5",
     "@babel/core": "^7.1.6",
     "@babel/preset-env": "^7.1.6",
-    "debug": "^4.1.0",
     "nodemon": "^1.18.6"
   },
   "dependencies": {
     "chalk": "^2.4.1",
     "commander": "^2.19.0",
-    "lodash": "^4.17.11"
+    "debug": "^4.1.0",
+    "lodash": "^4.17.11",
+    "treeify": "^1.1.0"
   }
 }

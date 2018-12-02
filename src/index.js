@@ -6,6 +6,7 @@ import path from 'path';
 import { loadStore, LOG_HELPER, executeCommand } from './helpers';
 import * as commands from './commands';
 import { forEach, values, keys } from 'lodash';
+import chalk from 'chalk';
 
 const DEFAULT_CONFIG = {
     /**
@@ -21,8 +22,8 @@ const DEFAULT_CONFIG = {
 export const storageFileURL = path.join(__dirname, '.thunder_store');
 
 const createStorageFile = () => { 
-    console.log("creating config file.");    
-    fs.writeFileSync(storageFileURL, JSON.stringify(DEFAULT_CONFIG))
+    fs.writeFileSync(storageFileURL, JSON.stringify(DEFAULT_CONFIG));
+    console.log(LOG_HELPER.INFO_CUSTOM('TB Init', "Created: Store File", chalk.yellow(storageFileURL)));
 }
 
 /**

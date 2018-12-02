@@ -1,10 +1,10 @@
 
 import path from 'path';
 import { omit, forEach, values, keys } from 'lodash';
-import { loadStore, saveStore, LOG_HELPER, executeCommand } from './helpers.js';
+import { loadStore, saveStore, LOG_HELPER, executeCommand, log } from './helpers.js';
 import chalk from 'chalk';
-import debug from 'debug';
-const logCommon = debug('common');
+import { asTree } from 'treeify';
+
 /**
  * Basic command
  * @param {*} program 
@@ -30,7 +30,6 @@ export const creationCommand = program =>
 export const listCommand = program =>
     program.command('list')
         .action((cmd) => {
-            logCommon("Listing Commands!")
             const { resolve } = loadStore();
             const resolvedKeys = keys(resolve);
             forEach(values(resolve), (resolution, index) => {
@@ -41,7 +40,6 @@ export const listCommand = program =>
 export const updatePathCommand = program =>
     program.command("update-path <name> <newPath>")
         .action((name, newPath, cmd) => {
-            logCommon("hello world");
             const parsedPath = path.resolve(newPath);
             const store = loadStore();
             const entity = store.resolve[name];
@@ -60,15 +58,21 @@ export const updatePathCommand = program =>
 export const updateNameCommand = program => 
     program.command("update-name <name> <newName>")
         .action((currentName, newName, cmd) => {
-        console.log("updating name")
-        const store = loadStore();
-        const entity = store.resolve[currentName];
-        if (!entity) return console.log(LOG_HELPER.ERR(
-            `Failed to resolve entity with name of ${LOG_HELPER.INLINE_STAND_OUT(currentName)}`
-        ));
-        const newResolutions = omit(store.resolve, currentName);
-        newResolutions[newName] = entity;
-        saveStore(store, true);
+        log.common('executing update-name command.');
+            const store = loadStore();
+            const entity = store.resolve[currentName];
+            log.common_large(LOG_HELPER.INFO_CUSTOM("Resolution Search", '', asTree(store.resolve)));
+            if (!entity) return console.log(LOG_HELPER.ERR(
+                `Failed to resolve entity with name of ${LOG_HELPER.INLINE_STAND_OUT(currentName)}`
+            ));
+            log.common(`resolved entity as: ${currentName}: ${entity}`);    
+            const newResolutions = omit(store.resolve, currentName);
+            newResolutions[newName] = entity;
+            log.common(LOG_HELPER.INFO_CUSTOM('Store File:resolve(new)(unsaved)',
+                `Resolved new store resolutions`,
+                asTree(newResolutions, true, true)
+            ));
+            saveStore(store, true);
     })
 
 export const removeCommand = program =>
