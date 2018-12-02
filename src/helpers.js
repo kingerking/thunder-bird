@@ -39,10 +39,10 @@ export const LOG_HELPER = {
  * Load the storage buffer.
  * (make sure to save after editting.)
  */
-export function loadStore() {
+export function loadStore(doLog = true) {
     const storageObject = JSON.parse(fs.readFileSync(storageFileURL));
     if (!storageObject) throw new Error("Failed to resolve thunder-bird store file.");
-    log.common_large(LOG_HELPER.INFO_CUSTOM('Store File',
+    if(doLog) log.common_large(LOG_HELPER.INFO_CUSTOM('Store File',
         `Store Load`, ``,
         asTree(storageObject, true)
     ));
@@ -54,7 +54,7 @@ export function loadStore() {
  * Will make all the linked files executable.
  */
 export function permissionLinks() {
-    const { resolve } = loadStore();
+    const { resolve } = loadStore(false);
     const fileLinks = values(resolve);
     let output = "";
     fileLinks.forEach(fileLink => {
@@ -69,13 +69,13 @@ export function permissionLinks() {
  * @param {*} store 
  * @param {*} absolute 
  */
-export function saveStore(store = {}, absolute = false) {
+export function saveStore(store = {}, absolute = false, doLog = true) {
     if (!absolute) {
-        var currentStore = loadStore();
+        var currentStore = loadStore(false);
         var newStore = merge(currentStore, store);
     } else if(absolute) var newStore = store;
     fs.writeFileSync(storageFileURL, JSON.stringify(newStore, null, 4));
-    log.common_large(LOG_HELPER.INFO_CUSTOM('Store File', 'Store Load', asTree(newStore, true)));
+    if(doLog) log.common_large(LOG_HELPER.INFO_CUSTOM('Store File', 'Store Load', asTree(newStore, true)));
     permissionLinks();
 }
 

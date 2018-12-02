@@ -31,7 +31,7 @@ const createStorageFile = () => {
  * (much like yarn npm "scripts" commands)
  */
 const buildUserCommandsIntoFunctions = program => {
-    const { resolve: links } = loadStore();
+    const { resolve: links } = loadStore(false);
     if (!links) return console.log(LOG_HELPER.ERR(
         `Failed to load store.`
     ));

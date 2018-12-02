@@ -60,19 +60,23 @@ export const updateNameCommand = program =>
         .action((currentName, newName, cmd) => {
         log.common('executing update-name command.');
             const store = loadStore();
+            log.common_large(LOG_HELPER.INFO_CUSTOM("Resolution Search", currentName, asTree(store.resolve)));
             const entity = store.resolve[currentName];
-            log.common_large(LOG_HELPER.INFO_CUSTOM("Resolution Search", '', asTree(store.resolve)));
             if (!entity) return console.log(LOG_HELPER.ERR(
                 `Failed to resolve entity with name of ${LOG_HELPER.INLINE_STAND_OUT(currentName)}`
             ));
-            log.common(`resolved entity as: ${currentName}: ${entity}`);    
+            log.common(LOG_HELPER.INFO(
+                `Success, Resolved entity`,
+                `${currentName}: ${entity}`
+            ));    
             const newResolutions = omit(store.resolve, currentName);
             newResolutions[newName] = entity;
             log.common(LOG_HELPER.INFO_CUSTOM('Store File:resolve(new)(unsaved)',
                 `Resolved new store resolutions`,
                 asTree(newResolutions, true, true)
             ));
-            saveStore(store, true);
+            store.resolve = newResolutions;
+            saveStore(store, false);
     })
 
 export const removeCommand = program =>
