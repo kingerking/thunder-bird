@@ -77,15 +77,8 @@ export function executeCommand(linkName, params, cmd) {
     if (!link) return console.log(LOG_HELPER.ERR(
         `Failed to find ${LOG_HELPER.INLINE_STAND_OUT(linkName)} as a valid link.`
     ));
-    const child = child_process.fork(link, params, {
-        stdio: "inherit"
-    });
-    // child.stdout.pipe(process.stdout);
-    // child.stderr.pipe(process.stderr);
-    // child.stdin.pipe(process.stdin);
-    // child.on('message', data => process.stdout.write(data + "\n"));
-    // child.on('error', data => process.stderr.write(chalk.red(data + "\n")));
-    // child.on('exit', (code, signal) => process.exit(code));
+    const child = child_process.fork(link, params, { stdio: "inherit" });
+    child.once('close', code => process.exit(code));
 }
 
 /**
