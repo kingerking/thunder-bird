@@ -1,7 +1,7 @@
 
 import path from 'path';
 import { omit, forEach, values, keys } from 'lodash';
-import { loadStore, saveStore, LOG_HELPER, executeCommand, log } from './helpers.js';
+import { loadStore, saveStore, LOG_HELPER, executeCommand, log, listCustomCommands } from './helpers.js';
 import chalk from 'chalk';
 import { asTree } from 'treeify';
 
@@ -10,7 +10,7 @@ import { asTree } from 'treeify';
  * @param {*} program 
  */
 export const creationCommand = program =>
-    program.command('create <name> [path]')
+    program.command('create <name> [path]', "Create a custom command.")
         .option('-o, --overwrite', "Overwrite existing links.")
         .action((name, p = 'index.js', cmd) => {
             const parsedPath = path.resolve(p);
@@ -28,17 +28,11 @@ export const creationCommand = program =>
         });
 
 export const listCommand = program =>
-    program.command('list')
-        .action((cmd) => {
-            const { resolve } = loadStore();
-            const resolvedKeys = keys(resolve);
-            forEach(values(resolve), (resolution, index) => {
-                console.log(LOG_HELPER.INFO(`Name: ${LOG_HELPER.INLINE_STAND_OUT(resolvedKeys[index])}, Script: ${LOG_HELPER.INLINE_STAND_OUT(resolution)}`));
-            });        
-    });
+    program.command('list', "List all your commands you have registered with thunder-bird.")
+        .action(listCustomCommands);
     
 export const updatePathCommand = program =>
-    program.command("update-path <name> <newPath>")
+    program.command("update-path <name> <newPath>", "Update a commands registered target script.")
         .action((name, newPath, cmd) => {
             const parsedPath = path.resolve(newPath);
             const store = loadStore();
@@ -56,7 +50,7 @@ export const updatePathCommand = program =>
         });
 
 export const updateNameCommand = program => 
-    program.command("update-name <name> <newName>")
+    program.command("update-name <name> <newName>", "Update a commands registered name for a targeted script.")
         .action((currentName, newName, cmd) => {
         log.common('executing update-name command.');
             const store = loadStore();
@@ -80,7 +74,7 @@ export const updateNameCommand = program =>
     })
 
 export const removeCommand = program =>
-    program.command('remove <name>')
+    program.command('remove <name>', "Remove a custom/installed command from thunder bird.")
         .action((name, cmd) => {
             const store = loadStore();
             const path = store.resolve[name];
@@ -93,13 +87,14 @@ export const removeCommand = program =>
                 `Successfully removed the command with the name ${LOG_HELPER.INLINE_STAND_OUT(name)}`
             ));
         });
-
+        
 /**
  * Will run a linked command(use tb create <name> <relative file url>).
  * @param {*} program 
  */
 export const executionCommand = program =>
-    program.command('run <linkName> [params...]')
+    program.command('run <linkName> [params...]',
+        `Run a thunder bird installed/custom command, ${LOG_HELPER.INLINE_STAND_OUT('tb <linkName>')} is short hand for this command.`)
         .action((linkName, params = [], cmd) => {
             executeCommand(linkName, params, cmd);
         });

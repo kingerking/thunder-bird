@@ -3,10 +3,11 @@ import commander from 'commander';
 import pkg from '../package.json';
 import fs from 'fs';
 import path from 'path';
-import { loadStore, LOG_HELPER, executeCommand } from './helpers';
+import { loadStore, LOG_HELPER, executeCommand, defaultCommand } from './helpers';
 import * as commands from './commands';
 import { forEach, values, keys } from 'lodash';
 import chalk from 'chalk';
+import { asTree } from 'treeify'
 
 const DEFAULT_CONFIG = {
     /**
@@ -40,7 +41,7 @@ const buildUserCommandsIntoFunctions = program => {
         if (!entity) return console.log(LOG_HELPER.ERR(
             `Failed to find entity with name: ${LOG_HELPER.INLINE_STAND_OUT(key)}`
         ));
-        program.command(`${key} [params...]`).
+        program.command(`${key} [params...]`, '', { noHelp: true }).
             action((params = [], cmd) => executeCommand(key, params, cmd));
     })
 }
@@ -57,7 +58,25 @@ initProgram();
 // iterate through all command bodies so they can be registered with commander.
 forEach(values(commands, buildUserCommandsIntoFunctions(program)),
     commandFunctionBody => commandFunctionBody(program));
+program.on('--help', () => {
+    const additionalHelp = {
+        "Custom Command Descriptions": {
+            "Creating Descriptions": LOG_HELPER.INLINE_STAND_OUT(
+                `please create a package.json in the "SAME" directory as your script, make sure that your package.json has a 'description' key to apply your commands description to the 'tb list' output.`
+            )
+        }
+    }
+    console.log(LOG_HELPER.INFO(
+        `Please run ${LOG_HELPER.INLINE_STAND_OUT('tb help')} for help on custom / installed commands. Displaying documentation on thunder-bird now.`,
+        asTree(additionalHelp, true)
+    ));
+});
+
+// no command passed. Run the default command.
+if (!process.argv.slice(2).length) 
+    defaultCommand();
+else
+    program.parse(process.argv);
 
 
 
-program.parse(process.argv);

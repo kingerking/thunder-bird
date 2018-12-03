@@ -7,6 +7,7 @@ import path from 'path';
 import chalk from 'chalk';
 import debug from 'debug';
 import { asTree } from 'treeify';
+import _ from 'lodash';
 
 export const log = {
     common: debug('common'),
@@ -96,7 +97,44 @@ export function executeCommand(linkName, params, cmd) {
 }
 
 /**
+ * List command body.
+ */
+export function listCustomCommands() {
+    const { resolve } = loadStore();
+    const resolvedKeys = _.keys(resolve);
+    const trees = [];
+    _.forEach(_.values(resolve), (resolution, index) => {
+        const packageJSON = path.join(path.dirname(resolution), 'package.json');
+        if (fs.existsSync(packageJSON))
+        {
+            const parsedManifest = require(packageJSON);
+            if(parsedManifest && parsedManifest.description)
+                var desc = chalk.yellow(parsedManifest.description);
+        }
+        const tree = {
+            name: resolvedKeys[index],
+            script: resolution,
+            description: desc ||
+                LOG_HELPER.INLINE_STAND_OUT(
+                    `No description`
+                )
+        };
+        trees.push(tree);
+    });  
+    console.log(LOG_HELPER.INFO_CUSTOM("Display your commands", '', ...trees.map(tree => asTree(tree, true))))
+}
+
+
+
+/**
  * Weather or not this file is valid.
  * @param {*} url 
  */
 export const exists = url => fs.existsSync(url);
+
+/**
+ * Will fire a function that acts as the default command.
+ * NOTE: THIS IS FIRED WHEN NO ARGS ARE PASSED. so fire a function that requires zero args or
+ * can operate with zero args.
+ */
+export const defaultCommand = listCustomCommands;
