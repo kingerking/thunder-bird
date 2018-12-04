@@ -1,7 +1,7 @@
 
 import path from 'path';
 import _ from 'lodash';
-import { loadStore, saveStore, LOG_HELPER, executeCommand, log, listCustomCommands } from './helpers.js';
+import { loadStore, saveStore, LOG_HELPER, executeCommand, log, listCustomCommands, WHITELIST, checkWhitelist } from './helpers.js';
 import chalk from 'chalk';
 import { asTree } from 'treeify';
 
@@ -10,10 +10,13 @@ import { asTree } from 'treeify';
  * @param {*} program 
  */
 export const creationCommand = program =>
-    program.command('create <name> [path]')
+    program.command(`${WHITELIST.create} <name> [path]`)
         .description("Create a custom command.")
         .option('-o, --overwrite', "Overwrite existing links.")
         .action((name, p = 'index.js', cmd) => {
+            if (!checkWhitelist(name)) return console.log(LOG_HELPER.ERR(
+                `${name} is a white-listed command(internal), please pick a different name.`
+            ));
             const parsedPath = path.resolve(p);
             const store = loadStore();
             if (store.resolve[name] && !cmd.overwrite) // name exists.
@@ -29,12 +32,12 @@ export const creationCommand = program =>
         });
 
 export const listCommand = program =>
-    program.command('list')
+    program.command(WHITELIST.list)
         .description("List all your commands you have registered with thunder-bird.")
-        .action(listCustomCommands);
+        .action((path, cmd) => listCustomCommands(cmd));
     
 export const searchCommand = program =>
-    program.command('search <query>')
+    program.command(`${WHITELIST.search} <query>`)
         .description(`Search a command name.`)
         .action((query, cmd) => {
             log.common(LOG_HELPER.INFO(
@@ -45,7 +48,7 @@ export const searchCommand = program =>
             // if user doesnt pass any query then return all commands
             if (!query || query == '') {
                 log.common(LOG_HELPER.INFO(
-                    `no query, query: ${query}, typeof query: ${typeof query}`
+                    `no query: ${query}, typeof query: ${typeof query}`
                 ));
                 return listCustomCommands(resolve);
             }
@@ -62,7 +65,7 @@ export const searchCommand = program =>
         });
 
 export const updatePathCommand = program =>
-    program.command("update-path <name> <newPath>")
+    program.command(`${WHITELIST['update-path']} <name> <newPath>`)
         .description("Update a commands registered target script.")
         .action((name, newPath, cmd) => {
             const parsedPath = path.resolve(newPath);
@@ -81,7 +84,7 @@ export const updatePathCommand = program =>
         });
 
 export const updateNameCommand = program => 
-    program.command("update-name <name> <newName>")
+    program.command(`${WHITELIST['update-name']} <name> <newName>`)
         .description("Update a commands registered name for a targeted script.")
         .action((currentName, newName, cmd) => {
         log.common('executing update-name command.');
@@ -106,7 +109,7 @@ export const updateNameCommand = program =>
     })
 
 export const removeCommand = program =>
-    program.command('remove <name>')
+    program.command(`${WHITELIST.remove} <name>`)
         .description("Remove a custom/installed command from thunder bird.")
         .action((name, cmd) => {
             const store = loadStore();
@@ -126,7 +129,7 @@ export const removeCommand = program =>
  * @param {*} program 
  */
 export const executionCommand = program =>
-    program.command('run <linkName> [params...]')
+    program.command(`${WHITELIST.run} <linkName> [params...]`)
         .description(`Run a thunder bird installed/custom command, ${LOG_HELPER.INLINE_STAND_OUT('tb <linkName>')} is short hand for this command.`)
         .action((linkName, params = [], cmd) => {
             log.common(LOG_HELPER.INFO(

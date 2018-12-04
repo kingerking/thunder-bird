@@ -16,6 +16,30 @@ export const log = {
 };
 
 /**
+ * Reason for a white list is because if a user tries to overwrite a default command(thunder-bird command)
+ * then an TypeError will take place:
+ * ERR: [ERR_INVALID_ARG_TYPE]: The "path" argument must be of type string. Received type object
+ * I understand this object is redundant, but its worth using for software integrity.
+ */
+export const WHITELIST = {
+    create: 'create',
+    list: 'list',
+    search: 'search',
+    "update-path": 'update-path',
+    "update-name": "update-name",
+    remove: "remove",
+    run: "run"
+}
+
+/**
+ * Will ensure users dont overwrite default commands. will not allow command creation with default command names.
+ * @param {string} cmd Command to query the whitelist for.
+ */
+export function checkWhitelist(cmd) {
+
+}
+
+/**
  * Will add a + so users know something is assoiated with a given log
  */
 function replaceNewLineWithPlus(lineBuffer, plusArrowColorFunc = chalk.yellow) {
@@ -104,13 +128,12 @@ export function executeCommand(linkName, params, cmd) {
 /**
  * List command body.
  */
-export function listCustomCommands() {
+export function listCustomCommands(customResolve) {
     // Use all resolutions by default.
-    // if (!customResolve) var { resolve } = loadStore();
-    // // If user wants to only display custom resolutions then use
-    // // customResolve as resolution storage.
-    // else var resolve = customResolve;
-    const { resolve } = loadStore();
+    if (!customResolve) var { resolve } = loadStore();
+    // If user wants to only display custom resolutions then use
+    // customResolve as resolution storage.
+    else var resolve = customResolve;
     const resolvedKeys = _.keys(resolve);
     const trees = [];
     _.forEach(_.values(resolve), (resolution, index) => {
@@ -131,7 +154,7 @@ export function listCustomCommands() {
         };
         trees.push(tree);
     });  
-    console.log(LOG_HELPER.INFO_CUSTOM("Display your commands", '', ...trees.map(tree => asTree(tree, true))))
+    console.log(LOG_HELPER.INFO_CUSTOM(customResolve ? "Your search results" : "Display your commands", '', ...trees.map(tree => asTree(tree, true))))
 }
 
 
