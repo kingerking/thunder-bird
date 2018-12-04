@@ -26,7 +26,7 @@ console.log("Hello world test, my current working directory is: ", process.cwd()
 3. `update-path` Updates the path to your script(example: `tb update-path <your command name> <script path>`).
 4. `update-name` Updates your commands name(example: `tb update-name <your command name> <new name>`).
 5. `run` Runs one of your commands(See Hello world example).
-6. `tb --help` Note that additional documentation on this CLI is integrated directly into the --help command.
+6. `tb --help` Note that additional documentation on this CLI is integrated directlyUpd into the --help command.
 
 #### Contributing
 I am welcoming people to come contribute to this project if they wish too. As of writing this i have not tested this utility on windows, Please open an issue for feature requests, errors and support bugs.
