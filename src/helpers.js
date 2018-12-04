@@ -75,7 +75,6 @@ export function loadStore(doLog = true) {
     return storageObject;
 }
 
-
 /**
  * Will make all the linked files executable.
  */
