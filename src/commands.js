@@ -1,5 +1,6 @@
 
 import path from 'path';
+import fs from 'fs';
 import _ from 'lodash';
 import { loadStore, saveStore, LOG_HELPER, executeCommand, log, listCustomCommands, WHITELIST, checkWhitelist } from './helpers.js';
 import chalk from 'chalk';
@@ -13,8 +14,17 @@ export const creationCommand = program =>
     program.command(`${WHITELIST.create} <name> [path]`)
         .description("Create a custom command.")
         .option('-o, --overwrite', "Overwrite existing links.")
+        .option('-i, --inherit', "Inherit a files parent directory name to use as the command name.")
         .action((name, p = 'index.js', cmd) => {
-            if (!checkWhitelist(name)) return console.log(LOG_HELPER.ERR(
+
+            // this will allow users to use the target files parent directory name as the command name.
+            if (cmd.inherit) {
+                // since no first arg will be supplied the current state of name will become path.
+                p = name;
+                const resolved = path.resolve(p);
+                name = path.basename(path.dirname(resolved));
+            }
+            if (checkWhitelist(name)) return console.log(LOG_HELPER.ERR(
                 `${name} is a white-listed command(internal), please pick a different name.`
             ));
             const parsedPath = path.resolve(p);

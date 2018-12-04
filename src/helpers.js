@@ -36,7 +36,8 @@ export const WHITELIST = {
  * @param {string} cmd Command to query the whitelist for.
  */
 export function checkWhitelist(cmd) {
-
+    const ar = _.values(WHITELIST).filter(entity => cmd == entity);
+    return ar.length;
 }
 
 /**
