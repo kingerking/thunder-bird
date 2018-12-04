@@ -87,6 +87,11 @@ export function saveStore(store = {}, absolute = false, doLog = true) {
  * @param {*} cmd 
  */
 export function executeCommand(linkName, params, cmd) {
+    log.common(LOG_HELPER.INFO(
+        `in script execution body, with following info.`,
+        `linkName: ${linkName}`,
+        `params: ${params}`
+    ))
     const store = loadStore();
     const link = store.resolve[linkName];
     if (!link) return console.log(LOG_HELPER.ERR(
@@ -100,6 +105,11 @@ export function executeCommand(linkName, params, cmd) {
  * List command body.
  */
 export function listCustomCommands() {
+    // Use all resolutions by default.
+    // if (!customResolve) var { resolve } = loadStore();
+    // // If user wants to only display custom resolutions then use
+    // // customResolve as resolution storage.
+    // else var resolve = customResolve;
     const { resolve } = loadStore();
     const resolvedKeys = _.keys(resolve);
     const trees = [];

@@ -3,7 +3,7 @@ import commander from 'commander';
 import pkg from '../package.json';
 import fs from 'fs';
 import path from 'path';
-import { loadStore, LOG_HELPER, executeCommand, defaultCommand } from './helpers';
+import { loadStore, LOG_HELPER, executeCommand, defaultCommand, log } from './helpers';
 import * as commands from './commands';
 import { forEach, values, keys } from 'lodash';
 import chalk from 'chalk';
@@ -41,7 +41,7 @@ const buildUserCommandsIntoFunctions = program => {
         if (!entity) return console.log(LOG_HELPER.ERR(
             `Failed to find entity with name: ${LOG_HELPER.INLINE_STAND_OUT(key)}`
         ));
-        program.command(`${key} [params...]`, '', { noHelp: true }).
+        program.command(`${key} [params...]`, null, { noHelp: true }).
             action((params = [], cmd) => executeCommand(key, params, cmd));
     })
 }
@@ -54,9 +54,9 @@ const initProgram = () => {
 
 const program = commander.version(pkg.version);
 initProgram();
-
+buildUserCommandsIntoFunctions(program);
 // iterate through all command bodies so they can be registered with commander.
-forEach(values(commands, buildUserCommandsIntoFunctions(program)),
+forEach(values(commands),
     commandFunctionBody => commandFunctionBody(program));
 program.on('--help', () => {
     const additionalHelp = {
@@ -72,9 +72,13 @@ program.on('--help', () => {
     ));
 });
 
+// program.parse(process.argv);
 // no command passed. Run the default command.
 if (!process.argv.slice(2).length) 
+{
+    log.common(LOG_HELPER.INFO("Running default command"))
     defaultCommand();
+}
 else
     program.parse(process.argv);
 

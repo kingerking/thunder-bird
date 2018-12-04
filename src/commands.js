@@ -1,6 +1,6 @@
 
 import path from 'path';
-import { omit, forEach, values, keys } from 'lodash';
+import _ from 'lodash';
 import { loadStore, saveStore, LOG_HELPER, executeCommand, log, listCustomCommands } from './helpers.js';
 import chalk from 'chalk';
 import { asTree } from 'treeify';
@@ -10,7 +10,8 @@ import { asTree } from 'treeify';
  * @param {*} program 
  */
 export const creationCommand = program =>
-    program.command('create <name> [path]', "Create a custom command.")
+    program.command('create <name> [path]')
+        .description("Create a custom command.")
         .option('-o, --overwrite', "Overwrite existing links.")
         .action((name, p = 'index.js', cmd) => {
             const parsedPath = path.resolve(p);
@@ -28,11 +29,41 @@ export const creationCommand = program =>
         });
 
 export const listCommand = program =>
-    program.command('list', "List all your commands you have registered with thunder-bird.")
+    program.command('list')
+        .description("List all your commands you have registered with thunder-bird.")
         .action(listCustomCommands);
     
+export const searchCommand = program =>
+    program.command('search <query>')
+        .description(`Search a command name.`)
+        .action((query, cmd) => {
+            log.common(LOG_HELPER.INFO(
+                'Search command starts',
+                'loading store...'
+            ))
+            const { resolve } = loadStore();
+            // if user doesnt pass any query then return all commands
+            if (!query || query == '') {
+                log.common(LOG_HELPER.INFO(
+                    `no query, query: ${query}, typeof query: ${typeof query}`
+                ));
+                return listCustomCommands(resolve);
+            }
+            if (!resolve) return console.log(LOG_HELPER.ERR("Could not load store resolutions."));
+            const keys = _.keys(resolve);
+            const searchResultResolve = {};
+            keys.forEach(key => {
+                if (!key.match(query)) return;
+                const resolution = resolve[key];
+                if (!resolution) return;
+                searchResultResolve[key] = resolve[key];
+            })
+            listCustomCommands(searchResultResolve);
+        });
+
 export const updatePathCommand = program =>
-    program.command("update-path <name> <newPath>", "Update a commands registered target script.")
+    program.command("update-path <name> <newPath>")
+        .description("Update a commands registered target script.")
         .action((name, newPath, cmd) => {
             const parsedPath = path.resolve(newPath);
             const store = loadStore();
@@ -40,7 +71,7 @@ export const updatePathCommand = program =>
             if (!entity) return console.log(LOG_HELPER.ERR(
                 `Failed to resolve entity with name of ${LOG_HELPER.INLINE_STAND_OUT(name)}`
             ));
-            const newResolutions = omit(store.resolve, name);
+            const newResolutions = _.omit(store.resolve, name);
             newResolutions[name] = parsedPath;
             store.resolve = newResolutions;
             saveStore(store, true);
@@ -50,7 +81,8 @@ export const updatePathCommand = program =>
         });
 
 export const updateNameCommand = program => 
-    program.command("update-name <name> <newName>", "Update a commands registered name for a targeted script.")
+    program.command("update-name <name> <newName>")
+        .description("Update a commands registered name for a targeted script.")
         .action((currentName, newName, cmd) => {
         log.common('executing update-name command.');
             const store = loadStore();
@@ -63,7 +95,7 @@ export const updateNameCommand = program =>
                 `Success, Resolved entity`,
                 `${currentName}: ${entity}`
             ));    
-            const newResolutions = omit(store.resolve, currentName);
+            const newResolutions = _.omit(store.resolve, currentName);
             newResolutions[newName] = entity;
             log.common(LOG_HELPER.INFO_CUSTOM('Store File:resolve(new)(unsaved)',
                 `Resolved new store resolutions`,
@@ -74,14 +106,15 @@ export const updateNameCommand = program =>
     })
 
 export const removeCommand = program =>
-    program.command('remove <name>', "Remove a custom/installed command from thunder bird.")
+    program.command('remove <name>')
+        .description("Remove a custom/installed command from thunder bird.")
         .action((name, cmd) => {
             const store = loadStore();
             const path = store.resolve[name];
             if (!path) return console.log(LOG_HELPER.ERR(
                 `Failed to find path with name: ${LOG_HELPER.INLINE_STAND_OUT(name)}`
             ));
-            store.resolve = omit(store.resolve, [name]);
+            store.resolve = _.omit(store.resolve, [name]);
             saveStore(store, true);
             console.log(LOG_HELPER.INFO(
                 `Successfully removed the command with the name ${LOG_HELPER.INLINE_STAND_OUT(name)}`
@@ -93,8 +126,11 @@ export const removeCommand = program =>
  * @param {*} program 
  */
 export const executionCommand = program =>
-    program.command('run <linkName> [params...]',
-        `Run a thunder bird installed/custom command, ${LOG_HELPER.INLINE_STAND_OUT('tb <linkName>')} is short hand for this command.`)
+    program.command('run <linkName> [params...]')
+        .description(`Run a thunder bird installed/custom command, ${LOG_HELPER.INLINE_STAND_OUT('tb <linkName>')} is short hand for this command.`)
         .action((linkName, params = [], cmd) => {
+            log.common(LOG_HELPER.INFO(
+                `Run command executing, running script now.`
+            ))
             executeCommand(linkName, params, cmd);
         });
