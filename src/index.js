@@ -67,7 +67,7 @@ program.on('--help', () => {
         }
     }
     console.log(LOG_HELPER.INFO(
-        `Please run ${LOG_HELPER.INLINE_STAND_OUT('tb help')} for help on custom / installed commands. Displaying documentation on thunder-bird now.`,
+        `Displaying documentation on thunder-bird`,
         asTree(additionalHelp, true)
     ));
 });

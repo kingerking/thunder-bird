@@ -28,7 +28,10 @@ export const WHITELIST = {
     "update-path": 'update-path',
     "update-name": "update-name",
     remove: "remove",
-    run: "run"
+    run: "run",
+    set: "set",
+    get: "get",
+    store: "store"
 }
 
 /**
@@ -157,7 +160,30 @@ export function listCustomCommands(customResolve) {
     console.log(LOG_HELPER.INFO_CUSTOM(customResolve ? "Your search results" : "Display your commands", '', ...trees.map(tree => asTree(tree, true))))
 }
 
-
+/**
+ * Apply a key value pair to the store.settings.
+ * @param {*} property 
+ * @param {*} value 
+ */
+export function storeSet(property, value) {
+    const store = loadStore();
+    if (!store) return console.log(LOG_HELPER.ERR("Failed to load store.")) && false;
+    const { settings } = store;
+    if (!settings) {
+        log.common(LOG_HELPER.ERR(
+            `Settings structure is invalid.`,
+            `settings is ${LOG_HELPER.INLINE_STAND_OUT("null")}`
+        ));
+        return console.log(LOG_HELPER.ERR("Store format is invalid")) && false;
+    }
+    settings[property] = value;
+    if (value)
+        store.settings = settings;
+    else
+        store.settings = _.omit(settings, [property]);    
+    saveStore(store, true);
+    return true;
+}
 
 /**
  * Weather or not this file is valid.

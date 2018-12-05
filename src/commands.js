@@ -2,7 +2,7 @@
 import path from 'path';
 import fs from 'fs';
 import _ from 'lodash';
-import { loadStore, saveStore, LOG_HELPER, executeCommand, log, listCustomCommands, WHITELIST, checkWhitelist } from './helpers.js';
+import { loadStore, saveStore, LOG_HELPER, executeCommand, log, listCustomCommands, WHITELIST, checkWhitelist, storeSet, storeGet } from './helpers.js';
 import chalk from 'chalk';
 import { asTree } from 'treeify';
 
@@ -147,3 +147,47 @@ export const executionCommand = program =>
             ))
             executeCommand(linkName, params, cmd);
         });
+
+export const setSetting = program =>
+    program.command(`${WHITELIST.set} <settingName> [settingValue]`)
+        .description("Apply a value to a setting. No value supplied will result in the setting being removed.")
+        .action((settingName, settingValue = null, cmd) => {
+            log.common(LOG_HELPER.INFO(
+                `In settings "set" body.`
+            ));
+            if (!settingName) return console.log(LOG_HELPER.ERR("Cannot set a settings key without an identifer."));
+            if (!storeSet(settingName, settingValue)) return console.log(LOG_HELPER.ERR("Failed to set settings key."));
+            console.log(LOG_HELPER.INFO(
+                `Successfully set ${settingName} to ${settingValue}`
+            ));
+        });
+
+export const getSetting = program =>
+    program.command(`${WHITELIST.get} <settingName>`)
+        .description("View a readout of a part of the settings object.")
+        .action((settingName, cmd) => {
+            log.common(LOG_HELPER.INFO(
+                `In settings "get" body.`
+            ));
+            const { settings } = loadStore();
+            if (!settings) return console.log(LOG_HELPER.ERR("Failed to load settings object from store."));
+            const value = settings[settingName];
+            if (!value) return console.log(LOG_HELPER.ERR(`Failed to find ${settingName} as a valid settings property.`));
+            if (!settingName) return console.log(LOG_HELPER.ERR("Cannot get a settings key without an identifer."));
+            console.log(LOG_HELPER.INFO(
+                `${settingName}: ${value}`
+            ));
+        });
+
+
+
+export const storeCommand = program =>
+    program.command(`${WHITELIST.store}`)
+    .description('View the current state of the store object.')
+        .action((path, cmd) => {
+            const store = loadStore();
+            if (!store) return console.log(LOG_HELPER.ERR('failed to load store.'));
+            console.log(LOG_HELPER.INFO_CUSTOM(`Store File ReadOut`, '',
+                asTree(store, true)
+            ))
+    })
