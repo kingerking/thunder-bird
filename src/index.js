@@ -13,7 +13,12 @@ const DEFAULT_CONFIG = {
     /**
      * settings for this command line instance on someones computer.
      */
-    settings: {},
+    settings: {
+        "!default": {
+            "!execution": "node"
+        },
+        "!execution": ""
+    },
     /**
      * Peoples symbol links will be keys and values will be the url to their file to run with node.
      */ 

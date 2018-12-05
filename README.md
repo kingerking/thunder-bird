@@ -1,4 +1,9 @@
-# thunder-bird
+# ⛈thunder-bird🦅
+**Unleash your *Node.js* thunder!!**
+
+<!-- ### Description
+Thunder Bird is the leading Node.js script execution tool and background script scheduler. Unleash your talent with thunder bird to create automated server scripts and super 🌱seed your general development experience and happiness. No more messing around with project configuration and messy file structures, Write once then, Thunder Bird can do the nitty gritty crap for you and let you focus on writing the code. easily manage demon processes and easily execute scripts and projects all in one command line interface. -->
+
 ### What it does
 Thunder bird makes writing algorthims and node script utilities easy as cake!
 You simply make a thunder bird command and link it to a file then execute that file anywhere!

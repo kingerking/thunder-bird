@@ -179,8 +179,6 @@ export const getSetting = program =>
             ));
         });
 
-
-
 export const storeCommand = program =>
     program.command(`${WHITELIST.store}`)
     .description('View the current state of the store object.')
