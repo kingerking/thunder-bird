@@ -2,7 +2,7 @@
 import path from 'path';
 import fs from 'fs';
 import _ from 'lodash';
-import { loadStore, saveStore, LOG_HELPER, executeCommand, log, listCustomCommands, WHITELIST, checkWhitelist, storeSet, storeGet } from './helpers.js';
+import { loadStore, saveStore, schedule, LOG_HELPER, executeCommand, log, listCustomCommands, WHITELIST, checkWhitelist, storeSet, storeGet } from './helpers.js';
 import chalk from 'chalk';
 import { asTree } from 'treeify';
 

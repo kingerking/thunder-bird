@@ -3,7 +3,7 @@ import commander from 'commander';
 import pkg from '../package.json';
 import fs from 'fs';
 import path from 'path';
-import { loadStore, LOG_HELPER, executeCommand, defaultCommand, log } from './helpers';
+import { loadStore, LOG_HELPER, executeCommand, defaultCommand, log, createDemon } from './helpers';
 import * as commands from './commands';
 import { forEach, values, keys } from 'lodash';
 import chalk from 'chalk';
@@ -27,6 +27,9 @@ const DEFAULT_CONFIG = {
 
 export const storageFileURL = path.join(__dirname, '.thunder_store');
 
+/**
+ * Ran once on first command.
+ */
 const createStorageFile = () => { 
     fs.writeFileSync(storageFileURL, JSON.stringify(DEFAULT_CONFIG));
     console.log(LOG_HELPER.INFO_CUSTOM('TB Init', "Created: Store File", chalk.yellow(storageFileURL)));
@@ -54,11 +57,14 @@ const buildUserCommandsIntoFunctions = program => {
 // this will check for a configuration file, if non exists this will create one.
 const initProgram = () => {
     if (!fs.existsSync(storageFileURL))
+    {
         createStorageFile();
+        createDemon();
+    }
 }
 
-const program = commander.version(pkg.version);
 initProgram();
+const program = commander.version(pkg.version);
 buildUserCommandsIntoFunctions(program);
 // iterate through all command bodies so they can be registered with commander.
 forEach(values(commands),
