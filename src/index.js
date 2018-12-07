@@ -59,7 +59,7 @@ const initProgram = () => {
     if (!fs.existsSync(storageFileURL))
     {
         createStorageFile();
-        createDemon();
+        // createDemon();
     }
 }
 

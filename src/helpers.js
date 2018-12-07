@@ -190,34 +190,6 @@ export function storeSet(property, value) {
 export function schedule() {
 
 }
-
-/**
- * This will be ran once upon installation.
- */
-export function createDemon() {
-    return;
-    /**
-     * Order of operations:
-     * 1. Create execution permission for demon file.
-     * 2. let pm2 do its stuff.
-     */
-    const executionPath = path.join(__dirname, 'demon.js');
-    log.common("execution path: ", executionPath);
-    console.log(LOG_HELPER.INFO("Creating PM2 demon."));
-        
-    pm2.start({ 
-        script: executionPath,
-        max_memory_restart: '300M',
-        cwd: process.cwd()
-    }, (err, apps) => {
-        pm2.disconnect();   // Disconnects from PM2
-        if (err) {
-            console.log(LOG_HELPER.ERR(`Error with pm2: ${err}`));
-            process.exit(1);
-        }
-    });
-}
-
 /**
  * Weather or not this file is valid.
  * @param {*} url 
