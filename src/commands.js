@@ -188,4 +188,15 @@ export const storeCommand = program =>
             console.log(LOG_HELPER.INFO_CUSTOM(`Store File ReadOut`, '',
                 asTree(store, true)
             ))
-    })
+        })
+    
+/**
+ * Schedule a script task.
+ * @param {*} program 
+ */
+export const scheduleCommand = program =>
+    program.command(`${WHITELIST.schedule} <name> <when>`)
+        .description("Schedule a script to run")
+        .action((name, when, cmd) => {
+            
+        });

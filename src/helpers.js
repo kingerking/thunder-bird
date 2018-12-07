@@ -31,7 +31,8 @@ export const WHITELIST = {
     run: "run",
     set: "set",
     get: "get",
-    store: "store"
+    store: "store",
+    schedule: "schedule"
 }
 
 /**

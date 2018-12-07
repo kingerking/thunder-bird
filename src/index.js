@@ -69,6 +69,9 @@ program.on('--help', () => {
             "Creating Descriptions": LOG_HELPER.INLINE_STAND_OUT(
                 `please create a package.json in the "SAME" directory as your script, make sure that your package.json has a 'description' key to apply your commands description to the 'tb list' output.`
             )
+        },
+        "Scheduling Executions": {
+            ""
         }
     }
     console.log(LOG_HELPER.INFO(
