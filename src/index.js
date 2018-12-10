@@ -77,9 +77,7 @@ program.on('--help', () => {
             )
         },
         // TODO: write some documentation.
-        "Scheduling Executions": {
-            
-        }
+        "Scheduling Executions": {}
     }
     console.log(LOG_HELPER.INFO(
         `Displaying documentation on thunder-bird`,

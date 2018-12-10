@@ -2,9 +2,47 @@
 import path from 'path';
 import fs from 'fs';
 import _ from 'lodash';
-import { loadStore, saveStore, schedule, LOG_HELPER, executeCommand, log, listCustomCommands, WHITELIST, checkWhitelist, storeSet, storeGet } from './helpers.js';
+import {
+    storeLocation,
+    loadStore,
+    saveStore,
+    schedule,
+    LOG_HELPER,
+    executeCommand,
+    log,
+    listCustomCommands,
+    WHITELIST,
+    checkWhitelist,
+    storeSet,
+    storeGet,
+    resolveNameViaPackageJson
+} from './helpers.js';
 import chalk from 'chalk';
 import { asTree } from 'treeify';
+
+export const useCommand = program =>
+    program.command(`${WHITELIST.use} [directory]`)
+        .description("Use a given directory to build a list of commands(This is useful for organizing your commands into one directory.)")
+        .action((dir = '.', cmd) => {
+            log.common("In command body..")
+            const resolved = path.resolve(dir);
+            if (!resolved) return console.log(LOG_HELPER.ERR(
+                `Error while resolving URL for 'use' command.`
+            ));
+            try {
+                const directoryListing = fs.readdirSync(resolved);
+                var resolvedDirectoryListing = directoryListing.map(listing =>
+                    path.resolve(path.join(resolved, listing)));
+            } catch (e) {
+                return console.log(LOG_HELPER.ERR(
+                    "we encountered an error while reading this directory(error, directoryListing, resolvedDirectoryListing)",
+                    e, directoryListing, resolvedDirectoryListing)
+                );
+            }
+
+            console.log("listing: ", resolvedDirectoryListing);
+
+        });
 
 /**
  * Basic command
@@ -21,8 +59,7 @@ export const creationCommand = program =>
             if (cmd.inherit) {
                 // since no first arg will be supplied the current state of name will become path.
                 p = name;
-                const resolved = path.resolve(p);
-                name = path.basename(path.dirname(resolved));
+                name = resolveNameViaPackageJson(p);
             }
             if (checkWhitelist(name)) return console.log(LOG_HELPER.ERR(
                 `${name} is a white-listed command(internal), please pick a different name.`
@@ -185,7 +222,7 @@ export const storeCommand = program =>
         .action((path, cmd) => {
             const store = loadStore();
             if (!store) return console.log(LOG_HELPER.ERR('failed to load store.'));
-            console.log(LOG_HELPER.INFO_CUSTOM(`Store File ReadOut`, '',
+            console.log(LOG_HELPER.INFO_CUSTOM(`Store File ReadOut`, chalk.green(storeLocation),
                 asTree(store, true)
             ))
         })

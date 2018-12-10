@@ -8,7 +8,7 @@ import chalk from 'chalk';
 import debug from 'debug';
 import { asTree } from 'treeify';
 import _ from 'lodash';
-import pm2 from 'pm2';
+
 
 export const log = {
     common: debug('common'),
@@ -32,8 +32,10 @@ export const WHITELIST = {
     run: "run",
     set: "set",
     get: "get",
+    use: "use",
     store: "store",
-    schedule: "schedule"
+    // create this command with pm2 in future.
+    // schedule: "schedule"
 }
 
 /**
@@ -186,6 +188,13 @@ export function storeSet(property, value) {
     saveStore(store, true);
     return true;
 }
+
+/**
+ * Resolve a name.
+ */
+export const resolveNameViaPackageJson = absolutePath => 
+    path.basename(path.dirname(path.resolve(absolutePath)));
+
 
 export function schedule() {
 
