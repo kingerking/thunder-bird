@@ -8,7 +8,7 @@ import * as commands from './commands';
 import { forEach, values, keys } from 'lodash';
 import chalk from 'chalk';
 import { asTree } from 'treeify'
-
+ 
 const DEFAULT_CONFIG = {
     /**
      * settings for this command line instance on someones computer.
@@ -59,7 +59,6 @@ const initProgram = () => {
     if (!fs.existsSync(storageFileURL))
     {
         createStorageFile();
-        // createDemon();
     }
 }
 
