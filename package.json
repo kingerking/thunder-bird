@@ -1,6 +1,6 @@
 {
   "name": "@kinger6621/thunder-bird",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "A robust script execution command line program.",
   "main": "build/index.js",
   "repository": "https://github.com/kingerking/thunder-bird",
