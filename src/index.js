@@ -7,7 +7,8 @@ import { loadStore, LOG_HELPER, executeCommand, defaultCommand, log, createDemon
 import * as commands from './commands';
 import { forEach, values, keys } from 'lodash';
 import chalk from 'chalk';
-import { asTree } from 'treeify'
+import { asTree } from 'treeify';
+import os from 'os';
  
 const DEFAULT_CONFIG = {
     /**
@@ -25,7 +26,7 @@ const DEFAULT_CONFIG = {
     resolve: {}
 }
 
-export const storageFileURL = path.join(__dirname, '.thunder_store');
+export const storageFileURL = path.join(os.homedir() || __dirname, '.thunder_store');
 
 /**
  * Ran once on first command.
